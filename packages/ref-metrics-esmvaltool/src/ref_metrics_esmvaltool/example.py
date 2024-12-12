@@ -1,6 +1,6 @@
 from typing import Any
 
-import xarray as xr
+import xarray
 from ref_core.datasets import FacetFilter, SourceDatasetType
 from ref_core.metrics import DataRequirement, Metric, MetricExecutionDefinition, MetricResult
 from ruamel.yaml import YAML
@@ -10,7 +10,7 @@ from ref_metrics_esmvaltool.recipe import dataframe_to_recipe, load_recipe, run_
 yaml = YAML()
 
 
-def format_cmec_output_bundle(dataset: xr.Dataset) -> dict[str, Any]:
+def format_cmec_output_bundle(dataset: xarray.Dataset) -> dict[str, Any]:
     """
     Create a simple CMEC output bundle for the dataset.
 
@@ -103,6 +103,6 @@ class GlobalMeanTimeseries(Metric):
         # Run recipe
         result_dir = run_recipe(recipe, definition)
         result = next(result_dir.glob("work/timeseries/script1/*.nc"))
-        annual_mean_global_mean_timeseries = xr.open_dataset(result)
+        annual_mean_global_mean_timeseries = xarray.open_dataset(result)
 
         return MetricResult.build(definition, format_cmec_output_bundle(annual_mean_global_mean_timeseries))

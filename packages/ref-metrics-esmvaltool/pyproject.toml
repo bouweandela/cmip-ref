@@ -21,10 +21,10 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-    "pooch",
+    "pooch >= 1.8",
     "ref-core",
-    "ruamel.yaml",
-    "xarray",
+    "ruamel.yaml >= 0.18",
+    "xarray >= 2022",
 ]
 
 [project.license]
@@ -32,6 +32,7 @@ text = "Apache-2.0"
 
 [tool.uv]
 dev-dependencies = [
+    "pytest-mock >= 3.12",
 ]
 
 [build-system]

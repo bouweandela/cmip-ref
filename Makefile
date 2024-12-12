@@ -57,6 +57,12 @@ test-metrics-example:  ## run the tests
 		pytest packages/ref-metrics-example \
 		-r a -v --doctest-modules --cov=packages/ref-metrics-example/src
 
+.PHONY: test-metrics-esmvaltool
+test-metrics-esmvaltool:  ## run the tests
+	uv run --package ref-metrics-esmvaltool \
+		pytest packages/ref-metrics-esmvaltool \
+		-r a -v --doctest-modules --cov=packages/ref-metrics-esmvaltool/src
+
 .PHONY: test-integration
 test-integration:  ## run the integration tests
 	uv run \
@@ -64,7 +70,7 @@ test-integration:  ## run the integration tests
 		-r a -v
 
 .PHONY: test
-test: test-core test-ref test-metrics-example test-integration ## run the tests
+test: test-core test-ref test-metrics-example test-metrics-esmvaltool test-integration ## run the tests
 
 # Note on code coverage and testing:
 # If you want to debug what is going on with coverage, we have found

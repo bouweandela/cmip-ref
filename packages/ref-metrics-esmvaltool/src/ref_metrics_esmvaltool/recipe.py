@@ -148,12 +148,18 @@ def prepare_climate_data(datasets: pd.DataFrame, climate_data_dir: Path) -> None
         The directory where ESMValTool should look for input data.
     """
     for row in datasets.itertuples():
+        if not isinstance(row.instance_id, str):
+            msg = f"Invalid instance_id encountered in {row}"
+            raise ValueError(msg)
+        if not isinstance(row.path, str):
+            msg = f"Invalid path encountered in {row}"
+            raise ValueError(msg)
         tgt = climate_data_dir.joinpath(*row.instance_id.split(".")) / Path(row.path).name
         tgt.parent.mkdir(parents=True, exist_ok=True)
         tgt.symlink_to(row.path)
 
 
-def run_recipe(recipe: dict, definition: MetricExecutionDefinition) -> None:
+def run_recipe(recipe: dict[str, Any], definition: MetricExecutionDefinition) -> Path:
     """Run an ESMValTool recipe.
 
     Parameters
@@ -166,7 +172,7 @@ def run_recipe(recipe: dict, definition: MetricExecutionDefinition) -> None:
     """
     output_dir = definition.output_fragment
 
-    recipe_path = output_dir / "recipe_test.yml"
+    recipe_path = output_dir / "recipe_example.yml"
     with recipe_path.open("w", encoding="utf-8") as file:
         yaml.dump(recipe, file)
 
@@ -179,13 +185,14 @@ def run_recipe(recipe: dict, definition: MetricExecutionDefinition) -> None:
 
     results_dir = output_dir / "results"
     config = {
+        "drs": {
+            "CMIP6": "ESGF",
+        },
         "output_dir": str(results_dir),
         "rootpath": {
             "default": str(climate_data),
         },
-        "drs": {
-            "CMIP6": "ESGF",
-        },
+        "search_esgf": "never",
     }
     config_dir = output_dir / "config"
     config_dir.mkdir()
