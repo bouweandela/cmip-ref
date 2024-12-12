@@ -32,6 +32,7 @@ mypy:  ## run mypy on the codebase
 	MYPYPATH=stubs uv run --package ref-core mypy packages/ref-core
 	MYPYPATH=stubs uv run --package ref mypy packages/ref
 	MYPYPATH=stubs uv run --package ref-metrics-example mypy packages/ref-metrics-example
+	MYPYPATH=stubs uv run --package ref-metrics-esmvaltool mypy packages/ref-metrics-esmvaltool
 
 .PHONY: ruff-fixes
 ruff-fixes:  ## fix the code using ruff
