@@ -41,35 +41,36 @@ def as_isodate(timestamp: pd._libs.tslibs.timestamps.Timestamp) -> str:
     return str(timestamp).replace(" ", "T").replace("-", "").replace(":", "")
 
 
-def as_timerange(
-    start_time: pd._libs.tslibs.timestamps.Timestamp,
-    end_time: pd._libs.tslibs.timestamps.Timestamp,
-) -> str:
-    """Format `start_time` and `end_time` as an ESMValTool timerange.
+def as_timerange(group: pd.DataFrame) -> str | None:
+    """Format the timeranges from a dataframe as an ESMValTool timerange.
 
     Parameters
     ----------
-    start_time
-        A start time.
-    end_time
-        An end time.
+    group
+        The dataframe describing a single dataset.
 
     Returns
     -------
         A timerange.
     """
-    return f"{as_isodate(start_time)}/{as_isodate(end_time)}"
+    start_times = group.start_time.dropna()
+    if start_times.empty:
+        return None
+    end_times = group.end_time.dropna()
+    if end_times.empty:
+        return None
+    return f"{as_isodate(start_times.min())}/{as_isodate(end_times.max())}"
 
 
 def as_facets(
-    row: pd.core.frame.Pandas,  # type: ignore[name-defined]
+    group: pd.DataFrame,
 ) -> dict[str, Any]:
-    """Convert a row from the datasets dataframe to ESMValTool facets.
+    """Convert a group from the datasets dataframe to ESMValTool facets.
 
     Parameters
     ----------
-    row:
-        A row of the datasets dataframe.
+    group:
+        A group of datasets representing a single instance_id.
 
     Returns
     -------
@@ -77,11 +78,14 @@ def as_facets(
 
     """
     facets = {}
-    project = row.instance_id.split(".", 2)[0]
+    first_row = group.iloc[0]
+    project = first_row.instance_id.split(".", 2)[0]
     facets["project"] = project
     for esmvaltool_name, ref_name in FACETS[project].items():
-        facets[esmvaltool_name] = getattr(row, ref_name)
-    facets["timerange"] = as_timerange(row.start_time, row.end_time)
+        facets[esmvaltool_name] = getattr(first_row, ref_name)
+    timerange = as_timerange(group)
+    if timerange is not None:
+        facets["timerange"] = timerange
     return facets
 
 
@@ -98,8 +102,9 @@ def dataframe_to_recipe(datasets: pd.DataFrame) -> dict[str, Any]:
         A "variables" section that can be used in an ESMValTool recipe.
     """
     variables: dict[str, Any] = {}
-    for row in datasets.itertuples():
-        facets = as_facets(row)
+    # TODO: refine to make it possible to combine historical and scenario runs.
+    for _, group in datasets.groupby("instance_id"):
+        facets = as_facets(group)
         short_name = facets.pop("short_name")
         if short_name not in variables:
             variables[short_name] = {"additional_datasets": []}
