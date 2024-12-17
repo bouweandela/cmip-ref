@@ -501,6 +501,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "ref", extra = ["postgres"] },
     { name = "ref-core" },
+    { name = "ref-metrics-esmvaltool" },
     { name = "ref-metrics-example" },
 ]
 
@@ -539,6 +540,7 @@ dev = [
 requires-dist = [
     { name = "ref", extras = ["postgres"], editable = "packages/ref" },
     { name = "ref-core", editable = "packages/ref-core" },
+    { name = "ref-metrics-esmvaltool", editable = "packages/ref-metrics-esmvaltool" },
     { name = "ref-metrics-example", editable = "packages/ref-metrics-example" },
 ]
 
