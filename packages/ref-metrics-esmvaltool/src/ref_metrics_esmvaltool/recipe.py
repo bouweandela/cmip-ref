@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import importlib.resources
 import subprocess
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
-import pkg_resources
 import pooch  # type: ignore[import-untyped]
 from ref_core.datasets import SourceDatasetType
 from ref_core.metrics import MetricExecutionDefinition
@@ -120,7 +120,8 @@ _RECIPES = pooch.create(
     version=_ESMVALTOOL_VERSION,
     env="REF_METRICS_ESMVALTOOL_DATA_DIR",
 )
-_RECIPES.load_registry(pkg_resources.resource_stream("ref_metrics_esmvaltool", "recipes.txt"))
+with importlib.resources.files("ref_metrics_esmvaltool").joinpath("recipes.txt").open("rb") as _file:
+    _RECIPES.load_registry(_file)
 
 
 def load_recipe(recipe: str) -> dict[str, Any]:
