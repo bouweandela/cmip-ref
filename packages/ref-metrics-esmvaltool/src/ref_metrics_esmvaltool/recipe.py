@@ -27,7 +27,7 @@ FACETS = {
 }
 
 
-def as_isodate(timestamp: pd._libs.tslibs.timestamps.Timestamp) -> str:
+def as_isodate(timestamp: pd.Timestamp) -> str:
     """Format a timestamp as an ISO 8601 datetime.
 
     For example, '2014-12-16 12:00:00' will be formatted as '20141216T120000'.
