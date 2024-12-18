@@ -81,6 +81,7 @@ class TestIngest:
                 "--source-type",
                 "cmip6",
                 "--solve",
+                "--dry-run",
             ],
         )
         assert result.exit_code == 0, result.output
