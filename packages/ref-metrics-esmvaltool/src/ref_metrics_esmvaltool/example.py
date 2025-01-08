@@ -58,7 +58,7 @@ class GlobalMeanTimeseries(Metric):
     """
 
     name = "Global Mean Timeseries"
-    slug = "global-mean-timeseries"
+    slug = "esmvaltool-global-mean-timeseries"
 
     data_requirements = (
         DataRequirement(

@@ -58,7 +58,7 @@ class EquilibriumClimateSensitivity(Metric):
     """
 
     name = "Equilibrium Climate Sensitivity"
-    slug = "equilibrium-climate-sensitivity"
+    slug = "esmvaltool-equilibrium-climate-sensitivity"
 
     data_requirements = (
         DataRequirement(

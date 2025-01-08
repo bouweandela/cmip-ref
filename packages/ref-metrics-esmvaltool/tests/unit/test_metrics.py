@@ -28,7 +28,7 @@ def test_example_metric(tmp_path, mocker, metric_dataset, cmip6_data_catalog):
     definition = MetricExecutionDefinition(
         output_directory=output_directory,
         output_fragment=tmp_path,
-        key="global_mean_timeseries",
+        key="esmvaltool-global_mean_timeseries",
         metric_dataset=MetricDataset(
             {
                 SourceDatasetType.CMIP6: DatasetCollection(ds, "instance_id"),
