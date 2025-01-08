@@ -5,6 +5,7 @@ from ref_core.datasets import FacetFilter, SourceDatasetType
 from ref_core.metrics import DataRequirement, Metric, MetricExecutionDefinition, MetricResult
 from ruamel.yaml import YAML
 
+from ref_metrics_esmvaltool._version import __version__
 from ref_metrics_esmvaltool.recipe import dataframe_to_recipe, load_recipe, run_recipe
 
 yaml = YAML()
@@ -40,8 +41,8 @@ def format_cmec_output_bundle(dataset: xarray.Dataset) -> dict[str, Any]:
         # Is the schema tracked?
         "SCHEMA": {
             "name": "CMEC-REF",
-            "package": "example",
-            "version": "v1",
+            "package": "ref_metrics_esmvaltool",
+            "version": __version__,
         },
         "RESULTS": {
             dataset.attrs["source_id"]: {"global": {"tas": 0}},
@@ -57,7 +58,7 @@ class GlobalMeanTimeseries(Metric):
     """
 
     name = "Global Mean Timeseries"
-    slug = "esmvaltool-global-mean-timeseries"
+    slug = "global-mean-timeseries"
 
     data_requirements = (
         DataRequirement(

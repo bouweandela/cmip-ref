@@ -177,8 +177,9 @@ def run_recipe(recipe: dict[str, Any], definition: MetricExecutionDefinition) ->
 
     """
     output_dir = definition.output_fragment
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    recipe_path = output_dir / "recipe_example.yml"
+    recipe_path = output_dir / "recipe.yml"
     with recipe_path.open("w", encoding="utf-8") as file:
         yaml.dump(recipe, file)
 
