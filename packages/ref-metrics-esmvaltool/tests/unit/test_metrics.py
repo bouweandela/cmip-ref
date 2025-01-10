@@ -2,7 +2,7 @@ import pytest
 import ref_metrics_esmvaltool
 from ref_core.datasets import DatasetCollection, MetricDataset, SourceDatasetType
 from ref_core.metrics import MetricExecutionDefinition
-from ref_metrics_esmvaltool.example import GlobalMeanTimeseries
+from ref_metrics_esmvaltool.metrics import GlobalMeanTimeseries
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def test_example_metric(tmp_path, mocker, metric_dataset, cmip6_data_catalog):
     definition = MetricExecutionDefinition(
         output_directory=output_directory,
         output_fragment=tmp_path,
-        key="esmvaltool-global_mean_timeseries",
+        key="esmvaltool-global-mean-timeseries",
         metric_dataset=MetricDataset(
             {
                 SourceDatasetType.CMIP6: DatasetCollection(ds, "instance_id"),
@@ -51,7 +51,7 @@ def test_example_metric(tmp_path, mocker, metric_dataset, cmip6_data_catalog):
         side_effect=mock_check_call,
     )
     open_dataset = mocker.patch.object(
-        ref_metrics_esmvaltool.example.xarray,
+        ref_metrics_esmvaltool.metrics.example.xarray,
         "open_dataset",
         autospec=True,
         spec_set=True,
