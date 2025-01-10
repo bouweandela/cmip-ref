@@ -122,7 +122,7 @@ _RECIPES = pooch.create(
     version=_ESMVALTOOL_VERSION,
     env="REF_METRICS_ESMVALTOOL_DATA_DIR",
 )
-_RECIPES.load_registry(importlib.resources.open_text("ref_metrics_esmvaltool", "recipes.txt"))
+_RECIPES.load_registry(importlib.resources.open_binary("ref_metrics_esmvaltool", "recipes.txt"))
 
 
 def load_recipe(recipe: str) -> Recipe:
