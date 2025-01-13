@@ -1,4 +1,4 @@
-from ref_metrics_esmvaltool import __version__, provider
+from cmip_ref_metrics_esmvaltool import __version__, provider
 
 
 def test_provider():

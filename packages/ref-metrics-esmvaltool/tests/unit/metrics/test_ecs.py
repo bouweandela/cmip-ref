@@ -3,8 +3,8 @@ from pathlib import Path
 import numpy as np
 import pandas
 import xarray as xr
-from ref_metrics_esmvaltool.metrics import EquilibriumClimateSensitivity
-from ref_metrics_esmvaltool.recipe import load_recipe
+from cmip_ref_metrics_esmvaltool.metrics import EquilibriumClimateSensitivity
+from cmip_ref_metrics_esmvaltool.recipe import load_recipe
 
 
 def test_update_recipe():
