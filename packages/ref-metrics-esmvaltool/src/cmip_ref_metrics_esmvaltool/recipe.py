@@ -10,6 +10,7 @@ from ruamel.yaml import YAML
 
 from cmip_ref_core.datasets import SourceDatasetType
 from cmip_ref_core.metrics import MetricExecutionDefinition
+from cmip_ref_metrics_esmvaltool.types import Recipe
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -90,13 +91,13 @@ def as_facets(
     return facets
 
 
-def dataframe_to_recipe(datasets: pd.DataFrame) -> dict[str, Any]:
+def dataframe_to_recipe(files: pd.DataFrame) -> dict[str, Any]:
     """Convert the datasets dataframe to a recipe "variables" section.
 
     Parameters
     ----------
-    datasets
-        The pandas dataframe describing the input datasets.
+    files
+        The pandas dataframe describing the input files.
 
     Returns
     -------
@@ -104,7 +105,7 @@ def dataframe_to_recipe(datasets: pd.DataFrame) -> dict[str, Any]:
     """
     variables: dict[str, Any] = {}
     # TODO: refine to make it possible to combine historical and scenario runs.
-    for _, group in datasets.groupby("instance_id"):
+    for _, group in files.groupby("instance_id"):
         facets = as_facets(group)
         short_name = facets.pop("short_name")
         if short_name not in variables:
@@ -121,11 +122,10 @@ _RECIPES = pooch.create(
     version=_ESMVALTOOL_VERSION,
     env="REF_METRICS_ESMVALTOOL_DATA_DIR",
 )
-with importlib.resources.files("cmip_ref_metrics_esmvaltool").joinpath("recipes.txt").open("rb") as _file:
-    _RECIPES.load_registry(_file)
+_RECIPES.load_registry(importlib.resources.open_binary("cmip_ref_metrics_esmvaltool", "recipes.txt"))
 
 
-def load_recipe(recipe: str) -> dict[str, Any]:
+def load_recipe(recipe: str) -> Recipe:
     """Load a recipe.
 
     Parameters
@@ -166,7 +166,7 @@ def prepare_climate_data(datasets: pd.DataFrame, climate_data_dir: Path) -> None
         tgt.symlink_to(row.path)
 
 
-def run_recipe(recipe: dict[str, Any], definition: MetricExecutionDefinition) -> Path:
+def run_recipe(recipe: Recipe, definition: MetricExecutionDefinition) -> Path:
     """Run an ESMValTool recipe.
 
     Parameters
@@ -176,10 +176,16 @@ def run_recipe(recipe: dict[str, Any], definition: MetricExecutionDefinition) ->
     definition
         A description of the information needed for this execution of the metric.
 
+    Returns
+    -------
+    :
+        Directory containing results from the ESMValTool run.
+
     """
     output_dir = definition.output_fragment
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    recipe_path = output_dir / "recipe_example.yml"
+    recipe_path = output_dir / "recipe.yml"
     with recipe_path.open("w", encoding="utf-8") as file:
         yaml.dump(recipe, file)
 
