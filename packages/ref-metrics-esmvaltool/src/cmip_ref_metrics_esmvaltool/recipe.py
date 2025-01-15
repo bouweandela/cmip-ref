@@ -182,7 +182,7 @@ def run_recipe(recipe: Recipe, definition: MetricExecutionDefinition) -> Path:
         Directory containing results from the ESMValTool run.
 
     """
-    output_dir = definition.output_fragment
+    output_dir = definition.to_output_path()
     output_dir.mkdir(parents=True, exist_ok=True)
 
     recipe_path = output_dir / "recipe.yml"
