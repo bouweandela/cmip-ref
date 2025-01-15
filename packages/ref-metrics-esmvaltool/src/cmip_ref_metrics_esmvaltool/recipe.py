@@ -182,21 +182,18 @@ def run_recipe(recipe: Recipe, definition: MetricExecutionDefinition) -> Path:
         Directory containing results from the ESMValTool run.
 
     """
-    output_dir = definition.to_output_path()
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    recipe_path = output_dir / "recipe.yml"
+    recipe_path = definition.to_output_path("recipe.yml")
     with recipe_path.open("w", encoding="utf-8") as file:
         yaml.dump(recipe, file)
 
-    climate_data = output_dir / "climate_data"
+    climate_data = definition.to_output_path("climate_data")
 
     prepare_climate_data(
         definition.metric_dataset[SourceDatasetType.CMIP6].datasets,
         climate_data_dir=climate_data,
     )
 
-    results_dir = output_dir / "results"
+    results_dir = definition.to_output_path("results")
     config = {
         "drs": {
             "CMIP6": "ESGF",
@@ -207,7 +204,7 @@ def run_recipe(recipe: Recipe, definition: MetricExecutionDefinition) -> Path:
         },
         "search_esgf": "never",
     }
-    config_dir = output_dir / "config"
+    config_dir = definition.to_output_path("config")
     config_dir.mkdir()
     with (config_dir / "config.yml").open("w", encoding="utf-8") as file:
         yaml.dump(config, file)
