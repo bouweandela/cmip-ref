@@ -1,10 +1,14 @@
+from datetime import datetime
+
 import pandas as pd
 import pytest
 
 from cmip_ref_core.constraints import (
     GroupOperation,
     GroupValidator,
+    RequireContiguousTimerange,
     RequireFacets,
+    RequireOverlappingTimerange,
     SelectParentExperiment,
     apply_constraint,
 )
@@ -37,6 +41,172 @@ class TestRequireFacets:
             (pd.DataFrame({"variable_id": ["tas", "pr"], "extra": ["a", "b"]}), True),
             (pd.DataFrame({"variable_id": ["tas"]}), False),
             (pd.DataFrame({"variable_id": ["tas"], "extra": ["a"]}), False),
+        ],
+    )
+    def test_validate(self, data, expected):
+        assert self.validator.validate(data) == expected
+
+
+class TestContiguousTimerange:
+    validator = RequireContiguousTimerange(groupby="variable_id")
+
+    @pytest.mark.parametrize(
+        "data, expected",
+        [
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": [],
+                        "start_time": [],
+                        "end_time": [],
+                    }
+                ),
+                True,
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": ["tas", "tas"],
+                        "start_time": [
+                            datetime(2000, 1, 16, 12),
+                            datetime(2001, 1, 16, 12),
+                        ],
+                        "end_time": [
+                            datetime(2000, 12, 16, 12),
+                            datetime(2001, 12, 16, 12),
+                        ],
+                    }
+                ),
+                True,
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": ["tas", "tas"],
+                        "start_time": [
+                            datetime(2000, 1, 16, 12),
+                            datetime(2002, 1, 16, 12),
+                        ],
+                        "end_time": [
+                            datetime(2000, 12, 16, 12),
+                            datetime(2001, 12, 16, 12),
+                        ],
+                    }
+                ),
+                False,
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": ["tas", "tas", "areacella"],
+                        "start_time": [
+                            datetime(2000, 1, 16, 12),
+                            datetime(2001, 1, 16, 12),
+                            None,
+                        ],
+                        "end_time": [
+                            datetime(2000, 12, 16, 12),
+                            datetime(2001, 12, 16, 12),
+                            None,
+                        ],
+                    }
+                ),
+                True,
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": ["tas", "tas", "pr", "pr"],
+                        "start_time": [
+                            datetime(2000, 1, 16, 12),
+                            datetime(2001, 1, 16, 12),
+                            datetime(2000, 1, 16, 12),
+                            datetime(2002, 1, 16, 12),
+                        ],
+                        "end_time": [
+                            datetime(2000, 12, 16, 12),
+                            datetime(2001, 12, 16, 12),
+                            datetime(2000, 12, 16, 12),
+                            datetime(2002, 12, 16, 12),
+                        ],
+                    }
+                ),
+                False,
+            ),
+        ],
+    )
+    def test_validate(self, data, expected):
+        assert self.validator.validate(data) == expected
+
+
+class TestOverlappingTimerange:
+    validator = RequireOverlappingTimerange(groupby="variable_id")
+
+    @pytest.mark.parametrize(
+        "data, expected",
+        [
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": [],
+                        "start_time": [],
+                        "end_time": [],
+                    }
+                ),
+                True,
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": ["tas", "tas", "pr"],
+                        "start_time": [
+                            datetime(2000, 1, 16, 12),
+                            datetime(2001, 1, 16, 12),
+                            datetime(2001, 1, 16, 12),
+                        ],
+                        "end_time": [
+                            datetime(2001, 12, 16, 12),
+                            datetime(2002, 12, 16, 12),
+                            datetime(2014, 12, 16, 12),
+                        ],
+                    }
+                ),
+                True,
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": ["tas", "pr"],
+                        "start_time": [
+                            datetime(2000, 1, 16, 12),
+                            datetime(2002, 1, 16, 12),
+                        ],
+                        "end_time": [
+                            datetime(2001, 12, 16, 12),
+                            datetime(2002, 12, 16, 12),
+                        ],
+                    }
+                ),
+                False,
+            ),
+            (
+                pd.DataFrame(
+                    {
+                        "variable_id": ["tas", "tas", "areacella"],
+                        "start_time": [
+                            datetime(2000, 1, 16, 12),
+                            datetime(2001, 1, 16, 12),
+                            None,
+                        ],
+                        "end_time": [
+                            datetime(2000, 12, 16, 12),
+                            datetime(2001, 12, 16, 12),
+                            None,
+                        ],
+                    }
+                ),
+                True,
+            ),
         ],
     )
     def test_validate(self, data, expected):

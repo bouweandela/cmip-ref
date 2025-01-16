@@ -141,6 +141,74 @@ class RequireFacets:
 
 
 @frozen
+class RequireContiguousTimerange:
+    """
+    A constraint that requires datasets to have a contiguous timerange.
+    """
+
+    groupby: list[str]
+
+    def validate(self, group: pd.DataFrame) -> bool:
+        """
+        Check that all subgroups of the group have a contiguous timerange.
+        """
+        # Maximum allowed time difference between the end of one file and the
+        # start of the next file.
+        max_timedelta = pd.Timedelta(
+            days=31,  # Maximum number of days in a month.
+            hours=1,  # Allow for potential rounding errors.
+        )
+        group = group.dropna(subset=["start_time", "end_time"])
+        if len(group) < 2:  # noqa: PLR2004
+            return True
+
+        for _, subgroup in group.groupby(self.groupby):
+            if len(subgroup) < 2:  # noqa: PLR2004
+                continue
+            sorted_group = subgroup.sort_values("start_time")
+            start_series = sorted_group["start_time"]
+            end_series = sorted_group["end_time"]
+            # Sometimes the elements of start_series.values are of type datetime64[ns]
+            # and sometimes its elements are of type datetime.datetime.
+            # Convert both arrays to datetime.datetime objects to make sure they
+            # can be subtracted.
+            if hasattr(start_series, "dt"):
+                start_array = start_series.dt.to_pydatetime()
+            else:
+                start_array = start_series.values  # type: ignore[assignment]
+            if hasattr(end_series, "dt"):
+                end_array = end_series.dt.to_pydatetime()
+            else:
+                end_array = end_series.values  # type: ignore[assignment]
+            diff = start_array[1:] - end_array[:-1]
+            contiguous = (diff < max_timedelta).all()
+            if not contiguous:
+                return False
+        return True
+
+
+@frozen
+class RequireOverlappingTimerange:
+    """
+    A constraint that requires datasets to have an overlapping timerange.
+    """
+
+    groupby: list[str]
+
+    def validate(self, group: pd.DataFrame) -> bool:
+        """
+        Check that all subgroups of the group have an overlapping timerange.
+        """
+        group = group.dropna(subset=["start_time", "end_time"])
+        if len(group) < 2:  # noqa: PLR2004
+            return True
+
+        starts = group.groupby(self.groupby)["start_time"].min()
+        ends = group.groupby(self.groupby)["end_time"].max()
+        return starts.max() < ends.min()  # type: ignore[no-any-return]
+
+
+@frozen
 class SelectParentExperiment:
     """
     Include a dataset's parent experiment in the selection
