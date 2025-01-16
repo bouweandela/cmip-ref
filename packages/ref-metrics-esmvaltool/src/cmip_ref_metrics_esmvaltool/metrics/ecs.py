@@ -48,8 +48,8 @@ class EquilibriumClimateSensitivity(ESMValToolMetric):
             constraints=(
                 RequireFacets("variable_id", list(variables)),
                 RequireFacets("experiment_id", list(experiments)),
-                RequireContiguousTimerange(groupby=["instance_id"]),
-                RequireOverlappingTimerange(groupby=["instance_id"]),
+                RequireContiguousTimerange(group_by=["instance_id"]),
+                RequireOverlappingTimerange(group_by=["instance_id"]),
             ),
         ),
     )

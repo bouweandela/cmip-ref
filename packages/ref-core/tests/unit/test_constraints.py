@@ -48,7 +48,7 @@ class TestRequireFacets:
 
 
 class TestContiguousTimerange:
-    validator = RequireContiguousTimerange(groupby="variable_id")
+    validator = RequireContiguousTimerange(group_by="variable_id")
 
     @pytest.mark.parametrize(
         "data, expected",
@@ -140,7 +140,7 @@ class TestContiguousTimerange:
 
 
 class TestOverlappingTimerange:
-    validator = RequireOverlappingTimerange(groupby="variable_id")
+    validator = RequireOverlappingTimerange(group_by="variable_id")
 
     @pytest.mark.parametrize(
         "data, expected",

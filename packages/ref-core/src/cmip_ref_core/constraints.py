@@ -146,7 +146,11 @@ class RequireContiguousTimerange:
     A constraint that requires datasets to have a contiguous timerange.
     """
 
-    groupby: list[str]
+    group_by: list[str]
+    """
+    The fields to group the datasets by. Each group must be contiguous in time
+    to fulfill the constraint.
+    """
 
     def validate(self, group: pd.DataFrame) -> bool:
         """
@@ -162,7 +166,7 @@ class RequireContiguousTimerange:
         if len(group) < 2:  # noqa: PLR2004
             return True
 
-        for _, subgroup in group.groupby(self.groupby):
+        for _, subgroup in group.groupby(self.group_by):
             if len(subgroup) < 2:  # noqa: PLR2004
                 continue
             sorted_group = subgroup.sort_values("start_time")
@@ -193,7 +197,11 @@ class RequireOverlappingTimerange:
     A constraint that requires datasets to have an overlapping timerange.
     """
 
-    groupby: list[str]
+    group_by: list[str]
+    """
+    The fields to group the datasets by. There must be overlap in time between
+    the groups to fulfill the constraint.
+    """
 
     def validate(self, group: pd.DataFrame) -> bool:
         """
@@ -203,8 +211,8 @@ class RequireOverlappingTimerange:
         if len(group) < 2:  # noqa: PLR2004
             return True
 
-        starts = group.groupby(self.groupby)["start_time"].min()
-        ends = group.groupby(self.groupby)["end_time"].max()
+        starts = group.groupby(self.group_by)["start_time"].min()
+        ends = group.groupby(self.group_by)["end_time"].max()
         return starts.max() < ends.min()  # type: ignore[no-any-return]
 
 

@@ -27,7 +27,7 @@ class GlobalMeanTimeseries(ESMValToolMetric):
             filters=(FacetFilter(facets={"variable_id": ("tas",)}),),
             group_by=("instance_id",),
             constraints=(
-                RequireContiguousTimerange(groupby=["instance_id"]),
+                RequireContiguousTimerange(group_by=["instance_id"]),
                 # TODO: Add cell areas
             ),
         ),
