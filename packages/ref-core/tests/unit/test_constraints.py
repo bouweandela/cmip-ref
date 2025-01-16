@@ -48,7 +48,7 @@ class TestRequireFacets:
 
 
 class TestContiguousTimerange:
-    validator = RequireContiguousTimerange(group_by="variable_id")
+    validator = RequireContiguousTimerange(group_by=["variable_id"])
 
     @pytest.mark.parametrize(
         "data, expected",
@@ -116,16 +116,14 @@ class TestContiguousTimerange:
             (
                 pd.DataFrame(
                     {
-                        "variable_id": ["tas", "tas", "pr", "pr"],
+                        "variable_id": ["pr", "tas", "tas"],
                         "start_time": [
                             datetime(2000, 1, 16, 12),
-                            datetime(2001, 1, 16, 12),
                             datetime(2000, 1, 16, 12),
                             datetime(2002, 1, 16, 12),
                         ],
                         "end_time": [
                             datetime(2000, 12, 16, 12),
-                            datetime(2001, 12, 16, 12),
                             datetime(2000, 12, 16, 12),
                             datetime(2002, 12, 16, 12),
                         ],
@@ -140,7 +138,7 @@ class TestContiguousTimerange:
 
 
 class TestOverlappingTimerange:
-    validator = RequireOverlappingTimerange(group_by="variable_id")
+    validator = RequireOverlappingTimerange(group_by=["variable_id"])
 
     @pytest.mark.parametrize(
         "data, expected",
