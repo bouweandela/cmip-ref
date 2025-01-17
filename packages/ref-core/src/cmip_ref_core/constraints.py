@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Protocol, runtime_checkable
 
 import pandas as pd
@@ -88,17 +89,21 @@ but may also include validators that check if the group satisfies a certain cond
 
 
 def apply_constraint(
-    dataframe: pd.DataFrame, constraint: GroupConstraint, data_catalog: pd.DataFrame
+    dataframe: pd.DataFrame,
+    constraint: GroupConstraint,
+    data_catalog: pd.DataFrame,
 ) -> pd.DataFrame | None:
     """
     Apply a constraint to a group of datasets
 
     Parameters
     ----------
+    dataframe:
+        The group of datasets to apply the constraint to.
     constraint
-        The constraint to apply
+        The constraint to apply.
     data_catalog
-        The data catalog of datasets
+        The data catalog of all datasets.
 
     Returns
     -------
@@ -128,7 +133,7 @@ class RequireFacets:
     """
 
     dimension: str
-    required_facets: list[str]
+    required_facets: tuple[str]
 
     def validate(self, group: pd.DataFrame) -> bool:
         """
@@ -138,6 +143,58 @@ class RequireFacets:
             logger.warning(f"Dimension {self.dimension} not present in group {group}")
             return False
         return all(value in group[self.dimension].values for value in self.required_facets)
+
+
+@frozen
+class AddSupplementaryDataset:
+    """
+    Include e.g. a cell measure or ancillary variable in the selection.
+    """
+
+    supplementary_facets: dict[str, str | tuple[str, ...]]
+    """
+    Facets describing the supplementary dataset.
+    """
+
+    matching_facets: tuple[str, ...]
+    """
+    Facets that must match with datasets in the selection.
+    """
+
+    optional_matching_facets: tuple[str, ...]
+    """
+    Select only the best matching datasets based on similarity with these facets.
+    """
+
+    def apply(self, group: pd.DataFrame, data_catalog: pd.DataFrame) -> pd.DataFrame:
+        """
+        Add a supplementary dataset to the group.
+        """
+        supplementary_facets: defaultdict[str, tuple[str, ...]] = defaultdict(tuple)
+        for facet, values in self.supplementary_facets.items():
+            supplementary_facets[facet] = values if isinstance(values, tuple) else (values,)
+
+        for facet in self.matching_facets:
+            values = tuple(group[facet].unique())
+            supplementary_facets[facet] += values
+
+        supplementary_group = data_catalog
+        for facet, values in supplementary_facets.items():
+            mask = supplementary_group[facet].isin(values)
+            supplementary_group = supplementary_group[mask]
+
+        if not supplementary_group.empty and self.optional_matching_facets:
+            facets = list(self.matching_facets + self.optional_matching_facets)
+            datasets = group[facets].drop_duplicates()
+            indices = set()
+            for i in range(len(datasets)):
+                scores = (datasets.iloc[i] == supplementary_group[facets]).sum(axis=1)
+                matches = supplementary_group[scores == scores.max()]
+                matches = matches[matches["version"] == matches["version"].max()]
+                indices.add(matches.index[0])
+            supplementary_group = supplementary_group.loc[list(indices)].drop_duplicates()
+
+        return pd.concat([group, supplementary_group])
 
 
 @frozen

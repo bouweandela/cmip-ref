@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas
 import xarray
 
+from cmip_ref_core.constraints import AddSupplementaryDataset
 from cmip_ref_core.datasets import FacetFilter, SourceDatasetType
 from cmip_ref_core.metrics import DataRequirement
 from cmip_ref_metrics_esmvaltool._version import __version__
@@ -24,10 +25,14 @@ class GlobalMeanTimeseries(ESMValToolMetric):
         DataRequirement(
             source_type=SourceDatasetType.CMIP6,
             filters=(FacetFilter(facets={"variable_id": ("tas",)}),),
-            # Add cell areas to the groups
-            # constraints=(AddCellAreas(),),
-            # Run the metric on each unique combination of model, variable, experiment, and variant
-            group_by=("source_id", "variable_id", "experiment_id", "variant_label"),
+            group_by=("instance_id",),
+            constraints=(
+                AddSupplementaryDataset(
+                    supplementary_facets={"variable_id": "areacella"},
+                    matching_facets=("source_id", "grid_label"),
+                    optional_matching_facets=("table_id", "experiment_id", "member_id", "version"),
+                ),
+            ),
         ),
     )
 
