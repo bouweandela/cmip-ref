@@ -42,7 +42,7 @@ class EquilibriumClimateSensitivity(ESMValToolMetric):
                     },
                 ),
             ),
-            group_by=("source_id", "member_id"),
+            group_by=("source_id", "member_id", "grid_label"),
             constraints=(
                 RequireFacets("variable_id", list(variables)),
                 RequireFacets("experiment_id", list(experiments)),
